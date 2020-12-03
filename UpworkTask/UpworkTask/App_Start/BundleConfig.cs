@@ -25,6 +25,7 @@ namespace UpworkTask
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
+                      "~/Content/fw/all.min.css",
                       "~/Content/datatable/jquery.dataTables.min.css",
                       "~/Content/site.css"));
         }

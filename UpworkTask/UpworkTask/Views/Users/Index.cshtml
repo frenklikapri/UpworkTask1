@@ -10,14 +10,28 @@
         margin-bottom: 15px;
     }
 
-    #tblUsers > thead > tr > th{
-        padding-left: 10px;
+        #tblUsers > thead > tr > th {
+            padding-left: 10px;
+        }
+
+    #tblUsers_wrapper {
+        margin-top: 15px;
+    }
+
+    .btn-pagination {
+        margin-left: 3px;
     }
 </style>
 
-<div class="row">
+<div class="row" style="margin-bottom: 20px;">
     <div class="col">
         <h4>Here you will find some functionalities about the users task</h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <button class="btn btn-primary" onclick="openAddUser()">Add New</button>
     </div>
 </div>
 
@@ -30,6 +44,7 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Email</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -38,9 +53,81 @@
     </div>
 </div>
 
+<div class="modal" tabindex="-1" role="dialog" id="modalSaveUser">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add/Edit User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formSaveUser" novalidate>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="firstName">First Name</label>
+                            <input type="text" class="form-control" id="firstName"
+                                   placeholder="Frenkli"
+                                   required />
+                            <div class="invalid-feedback">
+                                Please enter your first name
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" 
+                                   placeholder="Kapri"
+                                   required />
+                            <div class="invalid-feedback">
+                                Please enter your last name
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-12">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" 
+                                   placeholder="email@test.com"
+                                   required />
+                            <div class="invalid-feedback">
+                                Please enter an email in correct format
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="userId" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="formSaveUser" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section scripts{
     <script>
+        $("#formSaveUser").on("submit", (event) => {
+            console.log(1)
+            if (event.target.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            event.target.classList.add('was-validated');
+        })
+
+        $("#modalSaveUser").on('shown.bs.modal', function () {
+            $("#firstName").focus();
+        });
+
         $(document).ready(() => {
+            createUsersDatatable();
+        })
+
+        function createUsersDatatable() {
+            $.fn.dataTable.ext.classes.sPageButton = 'btn btn-sm btn-primary btn-pagination';
+
             $("#tblUsers").DataTable({
                 ajax: {
                     url: '/api/users',
@@ -62,8 +149,33 @@
                     {
                         data: "Email"
                     },
+                    {
+                        data: "Actions",
+                        orderable: false,
+                        render: function (rowNr, type, rowData) {
+                            var html = `<div style="width: 100%; text-align: right;">`;
+
+                            html += `<button class="btn btn-sm btn-primary" title="Edit"><i class="fa fa-edit"></i></button>`;
+                            html += `<button class="btn btn-sm btn-danger ml-2" title="Delete"><i class="fa fa-trash"></i></button>`;
+
+                            html += `</div>`
+
+                            return html;
+                        }
+                    }
                 ]
             });
-        })
+        }
+
+        function openAddUser() {
+            $("#userId").val("")
+            $("#formSaveUser").trigger("reset")
+
+            showSaveUserModal();
+        }
+
+        function showSaveUserModal() {
+            $("#modalSaveUser").modal("show")
+        }
     </script>
 }
