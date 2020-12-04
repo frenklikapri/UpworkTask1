@@ -13,5 +13,7 @@ namespace UpworkTask.Interfaces
         Task<List<UserDto>> GetUsersAsync();
         Task<SaveUserResultDto> SaveUserAsync(UserDto userDto);
         Task<bool> DeleteUserAsync(int id);
+        Task<bool> DeleteAllUsersAsync();
+        Task<SaveUserResultDto> ImportUsersAsync(List<UserDto> users);
     }
 }

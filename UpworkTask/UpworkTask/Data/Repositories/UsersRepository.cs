@@ -27,6 +27,21 @@ namespace UpworkTask.Data.Repositories
             _logger = LogManager.GetCurrentClassLogger();
         }
 
+        public async Task<bool> DeleteAllUsersAsync()
+        {
+            try
+            {
+                _dbContext.Users.RemoveRange(await _dbContext.Users.ToListAsync());
+
+                return await _dbContext.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+                return false;
+            }
+        }
+
         public async Task<bool> DeleteUserAsync(int id)
         {
             try
@@ -68,6 +83,44 @@ namespace UpworkTask.Data.Repositories
             }
         }
 
+        public async Task<SaveUserResultDto> ImportUsersAsync(List<UserDto> users)
+        {
+            try
+            {
+                var usersInDb = await _dbContext
+                    .Users
+                    .ToListAsync();
+
+                // Remove users that already exists
+                users = users
+                    .Where(u => !usersInDb.Any(uDb => uDb.Email == u.Email))
+                    .ToList();
+
+                foreach (var user in users)
+                {
+                    var mapper = new Mapper(_mapper);
+                    var toAdd = mapper.Map<User>(user);
+
+                    _dbContext.Users.Add(toAdd);
+                }
+
+                var success = await _dbContext.SaveChangesAsync() > 0 || users.Count == 0;
+
+                return new SaveUserResultDto
+                {
+                    Success = success
+                };
+            }
+            catch (Exception ex)
+            {
+                return new SaveUserResultDto
+                {
+                    Success = false,
+                    UserExists = false
+                };
+            }
+        }
+
         public async Task<SaveUserResultDto> SaveUserAsync(UserDto userDto)
         {
             try
@@ -82,7 +135,7 @@ namespace UpworkTask.Data.Repositories
                         UserExists = true
                     };
 
-                if(userDto.Id > 0)
+                if (userDto.Id > 0)
                 {
                     var userInDb = await _dbContext
                         .Users
