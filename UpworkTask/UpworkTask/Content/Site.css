@@ -25,3 +25,13 @@ body > .body-content {
     content: " *";
     color: red;
 }
+
+.blockUI {
+    z-index: 999999 !important;
+    border: none !important;
+}
+
+.blockMsg {
+    color: white !important;
+    background: transparent !important;
+}

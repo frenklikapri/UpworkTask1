@@ -13,6 +13,7 @@ namespace UpworkTask
                         "~/Content/sweetalert/sweetalert2@10.js",
                         "~/Content/toastify/toastify.js",
                         "~/Scripts/utils.js",
+                        "~/Content/blockUI/jquery.blockUI.js",
                         "~/Content/datatable/jquery.dataTables.min.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(

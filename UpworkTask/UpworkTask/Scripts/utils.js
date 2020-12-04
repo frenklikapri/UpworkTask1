@@ -1,4 +1,8 @@
-﻿function showToaster(text, error = false) {
+﻿$(document).ready(() => {
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+})
+
+function showToaster(text, error = false) {
     Toastify({
         duration: 3000,
         text: text,
