@@ -15,6 +15,7 @@ namespace UpworkTask.Helpers
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<User, UserDto>();
+                cfg.CreateMap<UserDto, User>();
             });
 
             return config;

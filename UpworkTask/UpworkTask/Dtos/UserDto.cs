@@ -12,4 +12,10 @@ namespace UpworkTask.Dtos
         public string LastName { get; set; }
         public string Email { get; set; }
     }
+
+    public class SaveUserResultDto
+    {
+        public bool Success { get; set; }
+        public bool UserExists { get; set; }
+    }
 }

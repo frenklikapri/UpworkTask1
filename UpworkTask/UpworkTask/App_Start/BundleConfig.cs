@@ -10,6 +10,7 @@ namespace UpworkTask
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js",
+                      "~/Content/sweetalert/sweetalert2@10.js",
                         "~/Content/datatable/jquery.dataTables.min.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
@@ -26,6 +27,7 @@ namespace UpworkTask
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/fw/all.min.css",
+                      "~/Content/sweetalert/sweetalert2.min.css",
                       "~/Content/datatable/jquery.dataTables.min.css",
                       "~/Content/site.css"));
         }

@@ -66,7 +66,7 @@
                 <form id="formSaveUser" novalidate>
                     <div class="row">
                         <div class="form-group col-sm-6">
-                            <label for="firstName">First Name</label>
+                            <label for="firstName" class="required-label">First Name</label>
                             <input type="text" class="form-control" id="firstName"
                                    placeholder="Frenkli"
                                    required />
@@ -75,8 +75,8 @@
                             </div>
                         </div>
                         <div class="form-group col-sm-6">
-                            <label for="lastName">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" 
+                            <label for="lastName" class="required-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName"
                                    placeholder="Kapri"
                                    required />
                             <div class="invalid-feedback">
@@ -86,8 +86,8 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-12">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" 
+                            <label for="email" class="required-label">Email</label>
+                            <input type="email" class="form-control" id="email"
                                    placeholder="email@test.com"
                                    required />
                             <div class="invalid-feedback">
@@ -108,13 +108,90 @@
 
 @section scripts{
     <script>
+        var _usersDt = "";
+
+        function editClicked(id, firstName, lastName, email) {
+            $("#userId").val(id);
+            $("#firstName").val(firstName);
+            $("#lastName").val(lastName);
+            $("#email").val(email);
+
+            showSaveUserModal();
+        }
+
+        function deleteClicked(id) {
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-primary ml-2'
+                },
+                buttonsStyling: false
+            })
+
+            swalWithBootstrapButtons.fire({
+                title: 'Delete user',
+                text: "Are you sure you want to delete this user?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Delete'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        async: true,
+                        type: "DELETE",
+                        url: "/api/users/" + id,
+                        success: (result) => {
+                            if (result.Success) {
+                                _usersDt.ajax.reload();
+                            } else {
+                                alert("error")
+                            }
+                        }
+                    });
+                }
+            })
+        }
+
         $("#formSaveUser").on("submit", (event) => {
-            console.log(1)
+            event.preventDefault();
+
             if (event.target.checkValidity() === false) {
                 event.preventDefault();
                 event.stopPropagation();
             }
             event.target.classList.add('was-validated');
+
+            let firstName = $("#firstName").val();
+            let lastName = $("#lastName").val();
+            let email = $("#email").val();
+            let id = $("#userId").val();
+
+            let user = {
+                firstName,
+                lastName,
+                email,
+                id
+            }
+
+            $.ajax({
+                async: true,
+                type: "POST",
+                url: "/api/users",
+                data: user,
+                success: (result) => {
+                    if (result.Success) {
+                        _usersDt.ajax.reload();
+
+                        closeSaveUserModal();
+                    } else if (result.UserExists) {
+                        alert("User exits")
+                    } else {
+                        alert("error")
+                    }
+                }
+            });
         })
 
         $("#modalSaveUser").on('shown.bs.modal', function () {
@@ -128,16 +205,17 @@
         function createUsersDatatable() {
             $.fn.dataTable.ext.classes.sPageButton = 'btn btn-sm btn-primary btn-pagination';
 
-            $("#tblUsers").DataTable({
+            _usersDt = $("#tblUsers").DataTable({
                 ajax: {
                     url: '/api/users',
-                    dataSrc: ''
+                    dataSrc: "",
+                    type: "GET"
                 },
                 columns: [
                     {
                         data: "Id",
-                        render: function (rowNr, type, rowData) {
-                            return rowNr;
+                        render: function (rowNr, type, rowData, meta) {
+                            return meta.row + 1;
                         },
                     },
                     {
@@ -150,13 +228,15 @@
                         data: "Email"
                     },
                     {
-                        data: "Actions",
+                        data: "",
                         orderable: false,
                         render: function (rowNr, type, rowData) {
                             var html = `<div style="width: 100%; text-align: right;">`;
 
-                            html += `<button class="btn btn-sm btn-primary" title="Edit"><i class="fa fa-edit"></i></button>`;
-                            html += `<button class="btn btn-sm btn-danger ml-2" title="Delete"><i class="fa fa-trash"></i></button>`;
+                            html += `<button class="btn btn-sm btn-primary" title="Edit"
+                                            onclick="editClicked('${rowData.Id}','${rowData.FirstName}','${rowData.LastName}','${rowData.Email}')"><i class="fa fa-edit"></i></button>`;
+                            html += `<button class="btn btn-sm btn-danger ml-2" title="Delete"
+                                            onclick="deleteClicked('${rowData.Id}')"><i class="fa fa-trash"></i></button>`;
 
                             html += `</div>`
 
@@ -170,12 +250,17 @@
         function openAddUser() {
             $("#userId").val("")
             $("#formSaveUser").trigger("reset")
+            $("#formSaveUser").removeClass("was-validated")
 
             showSaveUserModal();
         }
 
         function showSaveUserModal() {
             $("#modalSaveUser").modal("show")
+        }
+
+        function closeSaveUserModal() {
+            $("#modalSaveUser").modal("hide")
         }
     </script>
 }

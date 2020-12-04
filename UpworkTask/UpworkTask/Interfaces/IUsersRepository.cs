@@ -10,6 +10,8 @@ namespace UpworkTask.Interfaces
 {
     public interface IUsersRepository
     {
-        Task<PagedList<UserDto>> GetUsersAsync(PaginationParams paginationParams);
+        Task<List<UserDto>> GetUsersAsync();
+        Task<SaveUserResultDto> SaveUserAsync(UserDto userDto);
+        Task<bool> DeleteUserAsync(int id);
     }
 }

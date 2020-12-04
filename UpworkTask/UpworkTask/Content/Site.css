@@ -17,6 +17,11 @@
 }
 
 
-body > .body-content{
+body > .body-content {
     margin-top: 45px;
+}
+
+.required-label:after {
+    content: " *";
+    color: red;
 }
