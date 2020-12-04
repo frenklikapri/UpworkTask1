@@ -195,6 +195,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\AutoMapperConfiguration.cs" />
+    <Compile Include="Helpers\EfConfiguration.cs" />
     <Compile Include="Infrastructure\DIBuilder.cs" />
     <Compile Include="Interfaces\IUsersRepository.cs" />
     <Compile Include="Migrations\202012032013173_Initial.cs" />
