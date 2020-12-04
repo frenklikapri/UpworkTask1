@@ -31,10 +31,12 @@
 
 <div class="row">
     <div class="col">
-        <button class="btn btn-primary" onclick="openAddUser()">Add New</button>
-        <button class="btn btn-primary ml-1" onclick="loadFromExcel()">Load<i class="fa fa-info-circle ml-2" title="Load from excel file"></i></button>
+        <button class="btn btn-primary" onclick="openAddUser()"><i class="fa fa-plus mr-1"></i>Add New</button>
+        <button class="btn btn-primary ml-1" onclick="loadFromExcel();">
+            <i class="fa fa-file-import mr-1"></i>Import<i class="fa fa-info-circle ml-2" title="Import data from excel file"></i>
+        </button>
         <input type="file" id="excelUsers" style="display: none;" />
-        <button class="btn btn-danger ml-1" onclick="deleteAllUsers()">Delete All</button>
+        <button class="btn btn-danger ml-1" onclick="deleteAllUsers();"><i class="fa fa-trash mr-1"></i>Delete All</button>
     </div>
 </div>
 
@@ -263,9 +265,9 @@
                             var html = `<div style="width: 100%; text-align: right;">`;
 
                             html += `<button class="btn btn-sm btn-primary" title="Edit"
-                            onclick="editClicked('${rowData.Id}','${rowData.FirstName}','${rowData.LastName}','${rowData.Email}')"><i class="fa fa-edit"></i></button>`;
+        onclick="editClicked('${rowData.Id}','${rowData.FirstName}','${rowData.LastName}','${rowData.Email}')"><i class="fa fa-edit"></i></button>`;
                             html += `<button class="btn btn-sm btn-danger ml-2" title="Delete"
-                            onclick="deleteClicked('${rowData.Id}')"><i class="fa fa-trash"></i></button>`;
+        onclick="deleteClicked('${rowData.Id}')"><i class="fa fa-trash"></i></button>`;
 
                             html += `</div>`
 
