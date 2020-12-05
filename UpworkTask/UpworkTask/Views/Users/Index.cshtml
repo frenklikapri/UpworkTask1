@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Users";
 }
 
 <style>
@@ -186,11 +186,10 @@
         $("#formSaveUser").on("submit", (event) => {
             event.preventDefault();
 
-            if (event.target.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
             event.target.classList.add('was-validated');
+            if (event.target.checkValidity() === false) {
+                return;
+            }
 
             let firstName = $("#firstName").val();
             let lastName = $("#lastName").val();

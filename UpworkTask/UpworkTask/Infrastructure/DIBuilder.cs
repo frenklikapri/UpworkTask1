@@ -38,6 +38,7 @@ namespace UpworkTask.Infrastructure
             builder.RegisterType<DataContext>();
             builder.RegisterInstance(AutoMapperConfiguration.CreateConfiguration()).As<MapperConfiguration>();
             builder.RegisterType<UsersRepository>().As<IUsersRepository>();
+            builder.RegisterType<ProductsRepository>().As<IProductsRepository>();
 
             var container = builder.Build();
             Container = container;

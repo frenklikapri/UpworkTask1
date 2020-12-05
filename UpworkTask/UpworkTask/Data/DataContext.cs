@@ -16,5 +16,15 @@ namespace UpworkTask.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
+
+        /// <summary>
+        /// Used to get the product specifications from db. You can add as many as you want there
+        /// </summary>
+        public DbSet<ProductSpecification> ProductSpecifications { get; set; }
+
+        /// <summary>
+        /// Used to get the product languages from db. You can add as many as you want there
+        /// </summary>
+        public DbSet<ProductLanguage> ProductLanguages { get; set; }
     }
 }

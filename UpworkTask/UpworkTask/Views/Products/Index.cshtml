@@ -1,0 +1,457 @@
+﻿
+@{
+    ViewBag.Title = "Products";
+}
+
+<style>
+    #modalViewSpecifications > .modal-dialog{
+        max-width: 95%;
+        width: 95%;
+    }
+
+    #tblProducts {
+        width: 100% !important;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+        #tblProducts > thead > tr > th {
+            padding-left: 10px;
+        }
+
+    #tblProducts_wrapper {
+        margin-top: 15px;
+    }
+
+    .btn-pagination {
+        margin-left: 3px;
+    }
+</style>
+
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col">
+        <h4>Here you will find some functionalities about the products task</h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <button class="btn btn-primary" onclick="openAddProduct()"><i class="fa fa-plus mr-1"></i>Add New</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <table class="table table-hover" id="tblProducts">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>EAN</th>
+                    <th>Material Number</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="modalSaveProduct">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add/Edit Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formSaveProduct" novalidate>
+                    <div class="row">
+                        <div class="form-group col-12">
+                            <button type="button" class="btn btn-primary" onclick="fillRandomValues()">Fill with random values</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="ean" class="required-label">EAN</label>
+                            <input type="text" class="form-control" id="ean"
+                                   placeholder="123456789"
+                                   required />
+                            <div class="invalid-feedback">
+                                Please enter EAN
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="materialNumber" class="required-label">Material Number</label>
+                            <input type="text" class="form-control" id="materialNumber"
+                                   placeholder="123456789"
+                                   required />
+                            <div class="invalid-feedback">
+                                Please enter Material Number
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-12">
+                            <h4 style="margin:0px;margin-top: 10px;">Specifications</h4>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="productId" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="formSaveProduct" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="modalViewSpecifications">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Product Specifications</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <label for="eanView" class="required-label">EAN</label>
+                        <input type="text" class="form-control" id="eanView"
+                               disabled
+                               required />
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label for="materialNumberView" class="required-label">Material Number</label>
+                        <input type="text" class="form-control" id="materialNumberView"
+                               disabled
+                               required />
+                    </div>
+                </div>
+                <div class="row" id="rowToAppendSpecifications">
+                    <div class="form-group col-12">
+                        <h4 style="margin:0px;margin-top: 10px;">Specifications</h4>
+                    </div>
+                    <div class="form-group col-12">
+                        <table class="table table-hover" id="tblProductSpecifications">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        var _productsDt = "";
+
+        function editClicked(id, firstName, lastName, email) {
+            $("#productId").val(id);
+            $("#firstName").val(firstName);
+            $("#lastName").val(lastName);
+            $("#email").val(email);
+
+            showSaveProductModal();
+        }
+
+        function deleteClicked(id) {
+            showSwalConfirm("Delete product", "Are you sure you want to delete this product?", () => {
+                $.ajax({
+                    async: true,
+                    type: "DELETE",
+                    url: "/api/products/" + id,
+                    success: (result) => {
+                        if (result.Success) {
+                            showToaster("Product deleted successfully", false);
+                            _productsDt.ajax.reload();
+                        } else {
+                            showToaster("An error has occurred", true);
+                        }
+                    }
+                });
+            })
+        }
+
+        // used to fill the form with random values to speed up testing
+        function fillRandomValues() {
+            $("#ean").val(Math.floor(Math.random() * 100) + 1);
+            $("#materialNumber").val(Math.floor(Math.random() * 100) + 1);
+            $(".spec-input").each((i, elem) => {
+                $(elem).val(Math.floor(Math.random() * 100) + 1)
+            })
+        }
+
+        $("#formSaveProduct").on("submit", (event) => {
+            event.preventDefault();
+
+            event.target.classList.add('was-validated');
+            if (event.target.checkValidity() === false) {
+                return;
+            }
+
+            let id = $("#productId").val();
+            let eAN = $("#ean").val();
+            let materialNumber = $("#materialNumber").val();
+
+            let specificationObj = [];
+
+            // get all <div class="row">...</div> that we use for the form
+            $(".row-specification").each((i, elem) => {
+                // get the specification name from div
+                var specificationName = $(elem).attr("row-spec-name");
+                var objToAdd = {
+                    specificationName,
+                    languages: []
+                };
+
+                // get all inputs with the this specification name
+                $(`[input-spec-name='${specificationName}']`).each((j, inputElem) => {
+                    var languageName = $(inputElem).attr("input-spec-language");
+                    var value = $(inputElem).val();
+
+                    // add the values to objToAdd.languages property
+                    objToAdd.languages.push({
+                        languageName,
+                        value
+                    })
+                })
+
+                specificationObj.push(objToAdd)
+            })
+
+            // stringify object in order to send as string in back end
+            let specifications = JSON.stringify(specificationObj);
+
+            let product = {
+                id,
+                eAN,
+                materialNumber,
+                specifications
+            }
+
+            $.ajax({
+                async: true,
+                type: "POST",
+                url: "/api/products",
+                data: product,
+                success: (result) => {
+                    if (result.Success) {
+                        showToaster("Product saved successfully", false);
+
+                        _productsDt.ajax.reload();
+
+                        closeSaveProductModal();
+                    } else if (result.ProductExists) {
+                        showToaster("This product exists", true);
+                    } else {
+                        showToaster("An error has occurred", true);
+                    }
+                }
+            });
+        })
+
+        $("#modalSaveProduct").on('shown.bs.modal', function () {
+            $("#firstName").focus();
+        });
+
+        $(document).ready(() => {
+            setSpecificationsAndLanguages();
+            createProductsDatatable();
+        })
+
+        var _languages = [];
+        var _specifications = [];
+
+        function setSpecificationsAndLanguages() {
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/api/products/get-specs-langs",
+                success: (result) => {
+                    _languages = result.Languages;
+                    _specifications = result.Specifications;
+                    setSpecificationsHtml();
+                }
+            });
+        }
+
+        function createProductsDatatable() {
+            $.fn.dataTable.ext.classes.sPageButton = 'btn btn-sm btn-primary btn-pagination';
+
+            _productsDt = $("#tblProducts").DataTable({
+                ajax: {
+                    url: '/api/products',
+                    dataSrc: "",
+                    type: "GET"
+                },
+                columns: [
+                    {
+                        data: "Id",
+                        render: function (rowNr, type, rowData, meta) {
+                            return meta.row + 1;
+                        },
+                    },
+                    {
+                        data: "EAN"
+                    },
+                    {
+                        data: "MaterialNumber"
+                    },
+                    {
+                        data: "",
+                        orderable: false,
+                        render: function (rowNr, type, rowData) {
+                            var html = `<div style="width: 100%; text-align: right;">`;
+
+                            html += `<button class="btn btn-sm btn-primary" title="View Specifications"
+                                            onclick="viewSpecifications('${rowData.Id}')"><i class="fa fa-eye"></i></button>`;
+                            html += `<button class="btn btn-sm btn-primary ml-1" title="Edit"
+                                            onclick="editClicked('${rowData.Id}','${rowData.FirstName}','${rowData.LastName}','${rowData.Email}')"><i class="fa fa-edit"></i></button>`;
+                            html += `<button class="btn btn-sm btn-danger ml-1" title="Delete"
+                                            onclick="deleteClicked('${rowData.Id}')"><i class="fa fa-trash"></i></button>`;
+
+                            html += `</div>`
+
+                            return html;
+                        }
+                    }
+                ]
+            });
+        }
+
+        function openAddProduct() {
+            if (_languages.length == 0 || _specifications.length == 0)
+                return;
+
+            $("#productId").val("")
+            $("#formSaveProduct").trigger("reset")
+            $("#formSaveProduct").removeClass("was-validated")
+
+            showSaveProductModal();
+        }
+
+        function showSaveProductModal() {
+            $("#modalSaveProduct").modal("show")
+        }
+
+        function closeSaveProductModal() {
+            $("#modalSaveProduct").modal("hide")
+        }
+
+        function viewSpecifications(id) {
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/api/products/" + id,
+                success: (result) => {
+                    $("#eanView").val(result.EAN);
+                    $("#materialNumberView").val(result.MaterialNumber);
+                    var obj = JSON.parse(result.Specifications);
+
+                    setViewSpecificationHtml(obj);
+
+                    $("#modalViewSpecifications").modal("show")
+                }
+            });
+        }
+
+        // used to create html for the table of product specifications (in view form)
+        function setViewSpecificationHtml(specifications) {
+            if (specifications == "" || specifications.length == 0)
+                return;
+
+            var html = ``;
+
+            var headers = specifications[0].languages;
+
+            html += `<thead>`;
+            html += `<tr>`;
+            html += `<th>Specification</th>`;
+            headers.forEach(header => {
+                html += `<th>${header.languageName}</th>`;
+            })
+            html += `</tr>`;
+            html += `</thead>`;
+
+            html += `<tbody>`;
+            specifications.forEach(spec => {
+                html += `<tr>`;
+                html += `<td>${spec.specificationName}</td>`;
+
+                spec.languages.forEach(lang => {
+                    html += `<td>${lang.value}</td>`;
+                })
+
+                html += `</tr>`;
+            })
+            html += `</tbody>`;
+
+            $("#tblProductSpecifications").html(html);
+        }
+
+        // function to set the html for products specifications form
+        function setSpecificationsHtml() {
+            var html = createSpecifications();
+
+            // if no specification exists then add the html
+            if ($("#heightEnglish").length == 0)
+                $("#productId").before(html);
+        }
+
+        // creates the html for specification form for all rows
+        function createSpecifications() {
+            var html = ``;
+            _specifications.forEach(spec => {
+                html += createSpecificationHtml(spec.Title, spec.Name)
+            })
+
+            return html;
+        }
+
+        // creates the html for specification form for single row
+        function createSpecificationHtml(title, name) {
+            var html = `<div class="row row-specification" row-spec-name="${name}">
+                                                        <div class="form-group col-12">
+                                                            <b>${title}</b>
+                                                        </div>`;
+
+            _languages.forEach((lang, i) => {
+                var rowClass = "col-sm-6";
+
+                if (_languages.length & 1) {
+                    if (i == _languages.length - 1) {
+                        rowClass = "col-12"
+                    }
+                }
+
+                html += `<div class="form-group ${rowClass}">
+                                                            <label for="${name}${lang.Name}" class="required-label">${lang.Title}</label>
+                                                            <input type="text" class="form-control spec-input" id="${name}${lang.Name}"
+                                                                   input-spec-name="${name}"
+                                                                   input-spec-language="${lang.Name}"
+                                                                   required />
+                                                            <div class="invalid-feedback">
+                                                                Please enter ${title} in ${lang.Title}
+                                                            </div>
+                                                        </div>`;
+            })
+
+            html += `</div>`;
+            html += `<hr />`;
+
+            return html;
+        }
+    </script>
+}

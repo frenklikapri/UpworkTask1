@@ -91,11 +91,12 @@ namespace UpworkTask.Data.Repositories
                     .Users
                     .ToListAsync();
 
-                // Remove users that already exists
+                // Remove users from excel that already exists in db
                 users = users
                     .Where(u => !usersInDb.Any(uDb => uDb.Email == u.Email))
                     .ToList();
 
+                // add each user from excel in db
                 foreach (var user in users)
                 {
                     var mapper = new Mapper(_mapper);

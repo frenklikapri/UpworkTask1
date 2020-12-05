@@ -16,6 +16,8 @@ namespace UpworkTask.Helpers
             {
                 cfg.CreateMap<User, UserDto>();
                 cfg.CreateMap<UserDto, User>();
+                cfg.CreateMap<Product, ProductDto>();
+                cfg.CreateMap<ProductDto, Product>();
             });
 
             return config;
