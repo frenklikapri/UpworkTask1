@@ -4,9 +4,14 @@
 }
 
 <style>
-    #modalViewSpecifications > .modal-dialog{
+    #modalViewSpecifications > .modal-dialog {
         max-width: 95%;
         width: 95%;
+    }
+
+    #modalSaveProduct > .modal-dialog > .modal-content > .modal-body {
+        max-height: 750px;
+        overflow-y: auto;
     }
 
     #tblProducts {
@@ -157,13 +162,27 @@
     <script>
         var _productsDt = "";
 
-        function editClicked(id, firstName, lastName, email) {
+        function editClicked(id) {
             $("#productId").val(id);
-            $("#firstName").val(firstName);
-            $("#lastName").val(lastName);
-            $("#email").val(email);
 
-            showSaveProductModal();
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/api/products/" + id,
+                success: (result) => {
+                    $("#ean").val(result.EAN);
+                    $("#materialNumber").val(result.MaterialNumber);
+                    var obj = JSON.parse(result.Specifications);
+
+                    obj.forEach(item => {
+                        item.languages.forEach(lang => {
+                            $(`[input-spec-name="${item.specificationName}"][input-spec-language="${lang.languageName}"]`).val(lang.value);
+                        })
+                    })
+
+                    showSaveProductModal();
+                }
+            });
         }
 
         function deleteClicked(id) {
@@ -316,11 +335,11 @@
                             var html = `<div style="width: 100%; text-align: right;">`;
 
                             html += `<button class="btn btn-sm btn-primary" title="View Specifications"
-                                            onclick="viewSpecifications('${rowData.Id}')"><i class="fa fa-eye"></i></button>`;
+                                                onclick="viewSpecifications('${rowData.Id}')"><i class="fa fa-eye"></i></button>`;
                             html += `<button class="btn btn-sm btn-primary ml-1" title="Edit"
-                                            onclick="editClicked('${rowData.Id}','${rowData.FirstName}','${rowData.LastName}','${rowData.Email}')"><i class="fa fa-edit"></i></button>`;
+                                                onclick="editClicked('${rowData.Id}','${rowData.FirstName}','${rowData.LastName}','${rowData.Email}')"><i class="fa fa-edit"></i></button>`;
                             html += `<button class="btn btn-sm btn-danger ml-1" title="Delete"
-                                            onclick="deleteClicked('${rowData.Id}')"><i class="fa fa-trash"></i></button>`;
+                                                onclick="deleteClicked('${rowData.Id}')"><i class="fa fa-trash"></i></button>`;
 
                             html += `</div>`
 
@@ -343,6 +362,10 @@
         }
 
         function showSaveProductModal() {
+            $("#modalSaveProduct > .modal-dialog > .modal-content > .modal-body").animate({
+                scrollTop: $("#modalSaveProduct > .modal-dialog > .modal-content > .modal-body").offset().top
+            })
+
             $("#modalSaveProduct").modal("show")
         }
 
@@ -423,9 +446,9 @@
         // creates the html for specification form for single row
         function createSpecificationHtml(title, name) {
             var html = `<div class="row row-specification" row-spec-name="${name}">
-                                                        <div class="form-group col-12">
-                                                            <b>${title}</b>
-                                                        </div>`;
+                                                            <div class="form-group col-12">
+                                                                <b>${title}</b>
+                                                            </div>`;
 
             _languages.forEach((lang, i) => {
                 var rowClass = "col-sm-6";
@@ -437,15 +460,15 @@
                 }
 
                 html += `<div class="form-group ${rowClass}">
-                                                            <label for="${name}${lang.Name}" class="required-label">${lang.Title}</label>
-                                                            <input type="text" class="form-control spec-input" id="${name}${lang.Name}"
-                                                                   input-spec-name="${name}"
-                                                                   input-spec-language="${lang.Name}"
-                                                                   required />
-                                                            <div class="invalid-feedback">
-                                                                Please enter ${title} in ${lang.Title}
-                                                            </div>
-                                                        </div>`;
+                                                                <label for="${name}${lang.Name}" class="required-label">${lang.Title}</label>
+                                                                <input type="text" class="form-control spec-input" id="${name}${lang.Name}"
+                                                                       input-spec-name="${name}"
+                                                                       input-spec-language="${lang.Name}"
+                                                                       required />
+                                                                <div class="invalid-feedback">
+                                                                    Please enter ${title} in ${lang.Title}
+                                                                </div>
+                                                            </div>`;
             })
 
             html += `</div>`;
